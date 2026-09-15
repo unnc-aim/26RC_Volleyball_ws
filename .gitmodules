@@ -1,6 +1,6 @@
 [submodule "src/universal_controllers_v2"]
 	path = src/universal_controllers_v2
-	url = git@github.com:unnc-aim/26RC_universal_controllers_v2.git
+	url = git@github.com:unnc-aim/universal_controllers_v2.git
 [submodule "src/EcatV2_Master"]
 	path = src/EcatV2_Master
 	url = git@github.com:AIMEtherCAT/EcatV2_Master.git
