@@ -4,3 +4,12 @@
 [submodule "src/EcatV2_Master"]
 	path = src/EcatV2_Master
 	url = git@github.com:AIMEtherCAT/EcatV2_Master.git
+[submodule "src/volleyball_vision"]
+	path = src/volleyball_vision
+	url = https://github.com/HappyDog060713/volleyball_vision.git
+[submodule "src/volleyball_tracker"]
+	path = src/volleyball_tracker
+	url = https://github.com/HappyDog060713/volleyball_tracker.git
+[submodule "src/volleyball_planner"]
+	path = src/volleyball_planner
+	url = https://github.com/HappyDog060713/volleyball_planner.git
