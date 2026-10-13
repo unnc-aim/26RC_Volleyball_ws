@@ -7,7 +7,7 @@ def generate_launch_description():
     config_file = os.path.join(
         get_package_share_directory('soem_bringup'),
         'config',
-        'config-vol.yaml'
+        'config-vol-lk.yaml'
     )
 
     return LaunchDescription([
@@ -16,9 +16,9 @@ def generate_launch_description():
             executable='soem_backend',
             name='soem_backend',
             parameters=[{
-                'interface': "enp2s0",
-                'rt_cpu': 4,
-                'non_rt_cpus': "0-3,5-11",
+                'interface': "enp196s0",
+                'rt_cpu': 19,
+                'non_rt_cpus': "0-18",
                 'config_file': config_file
             }],
             output='screen'

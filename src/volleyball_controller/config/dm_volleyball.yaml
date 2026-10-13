@@ -1,0 +1,16 @@
+/dji_full_wheel_chassis_controller:
+  ros__parameters:
+    front_left_ecd_zero: 1356
+    front_right_ecd_zero: 7533
+    back_left_ecd_zero: 7427
+    back_right_ecd_zero: 1329
+    wheel_radius: 0.06
+    chassis_radius: 0.3
+    steer_motor_write_topic: "steer_motor_write"
+    steer_motor_read_topic: "steer_motor_read"
+    wheel_motor_write_topic: "wheel_motor_write"
+    wheel_motor_read_topic: "wheel_motor_read"
+    chassis_cmd_read_topic: "chassis_command"
+
+
+
