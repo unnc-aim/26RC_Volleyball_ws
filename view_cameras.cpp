@@ -83,13 +83,13 @@ void yoloInferenceThread(CameraThreadContext* ctx_l, CameraThreadContext* ctx_r,
         }
 
         cv::Mat frame_l, frame_r;
-        {
+        if (ctx_l) {
             std::lock_guard<std::mutex> lock(ctx_l->mtx);
             if (!ctx_l->latest_frame.empty()) {
                 frame_l = ctx_l->latest_frame.clone();
             }
         }
-        {
+        if (ctx_r) {
             std::lock_guard<std::mutex> lock(ctx_r->mtx);
             if (!ctx_r->latest_frame.empty()) {
                 frame_r = ctx_r->latest_frame.clone();
