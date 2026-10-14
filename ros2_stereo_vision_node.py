@@ -270,6 +270,19 @@ class Ros2StereoVisionNode(Node):
             cv2.putText(disp_r, "ROS 2 Topics: /volleyball/position", (15, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
 
             combined = cv2.hconcat([disp_l, disp_r])
+
+            # Also publish to ROS 2 debug image topic (viewable by rqt_image_view / rviz2)
+            if self.debug_img_pub.get_subscription_count() > 0:
+                img_msg = Image()
+                img_msg.header.stamp = self.get_clock().now().to_msg()
+                img_msg.header.frame_id = self.frame_id
+                img_msg.height, img_msg.width = combined.shape[:2]
+                img_msg.encoding = "bgr8"
+                img_msg.is_bigendian = 0
+                img_msg.step = combined.shape[1] * 3
+                img_msg.data = combined.tobytes()
+                self.debug_img_pub.publish(img_msg)
+
             cv2.imshow("ROS 2 Stereo Volleyball Vision (Direct OpenCV GUI)", combined)
             key = cv2.waitKey(1)
             if key == ord('q') or key == ord('Q') or key == 27:
