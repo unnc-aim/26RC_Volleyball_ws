@@ -7,3 +7,7 @@ log/
 .idea/
 .vscode/
 *.swp
+
+# MindVision runtime logs & binaries
+Camera/
+view_cameras
