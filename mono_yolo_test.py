@@ -77,8 +77,11 @@ def main():
         print(f"Failed to init camera, err={st}")
         return
 
-    # ISP Out format: BGR8 = 0x08080004 or CAMERA_MEDIA_TYPE_BGR8
-    mv.CameraSetIspOutFormat(h_cam, 0x08080004)
+    # ISP Out format: CAMERA_MEDIA_TYPE_BGR8 = 0x02180015
+    CAMERA_MEDIA_TYPE_BGR8 = 0x02180015
+    st_fmt = mv.CameraSetIspOutFormat(h_cam, CAMERA_MEDIA_TYPE_BGR8)
+    if st_fmt != 0:
+        print(f"Warning: CameraSetIspOutFormat returned {st_fmt}")
     mv.CameraSetTriggerMode(h_cam, 0) # continuous free-run
     mv.CameraSetExposureTime(h_cam, ctypes.c_double(2000.0)) # 2ms
 
