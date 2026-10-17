@@ -131,11 +131,11 @@ class Ros2StereoVisionNode(Node):
         self.declare_parameter('show_window', True)
         self.declare_parameter('frame_id', 'camera_optical_frame')
 
-        self.imgsz = self.get_parameter('imgsz').as_int()
-        self.conf_thresh = self.get_parameter('conf_thresh').as_double()
-        self.model_path = self.get_parameter('model_path').as_string()
-        self.show_window = self.get_parameter('show_window').as_bool()
-        self.frame_id = self.get_parameter('frame_id').as_string()
+        self.imgsz = int(self.get_parameter('imgsz').value)
+        self.conf_thresh = float(self.get_parameter('conf_thresh').value)
+        self.model_path = str(self.get_parameter('model_path').value)
+        self.show_window = bool(self.get_parameter('show_window').value)
+        self.frame_id = str(self.get_parameter('frame_id').value)
 
         self.point_pub = self.create_publisher(PointStamped, '/volleyball/position', 10)
         self.debug_img_pub = self.create_publisher(Image, '/volleyball/debug_image', 10)

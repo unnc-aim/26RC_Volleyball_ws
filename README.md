@@ -155,3 +155,84 @@ if (!rc_received_ || !rc_.online || rc_.frame_lost || rc_.fail_safe
   - **击打瞬间**：直接切换为纯力矩输出（`torque = -2000`），实现最高角加速度。
 - **DM 俯仰电机控制**：
   - 采用限速位置控制模式（`speed = 25 rad/s`），在 `[PITCH_MIN, PITCH_MAX]` 范围内平滑摆动。
+
+---
+
+## 三、 视觉系统与实时查看启动指南 (Vision System & Live Monitor)
+
+排球视觉感知系统采用**长基线双目立体相机（MindVision GigE）**结合 **YOLOv8** 深度学习检测模型，实时输出排球三维空间位置坐标 `/volleyball/position`（三维 $X, Y, Z$，单位：米）。
+
+### 1. 网络配置前置条件（静态 IP）
+相机硬件 IP 固定在 `192.168.1.82`（左目）和 `192.168.1.83`（右目）。主机连接相机的千兆网卡（如 `enp196s0`）必须配置为静态 IP `192.168.1.100/24`，否则 SDK 会因网段不匹配报通讯错误（`CameraInit err: -14`）。
+
+```bash
+# 永久配置相机千兆网卡静态 IP（建议重启后保持）
+sudo nmcli con mod "Wired connection 2" ipv4.method manual ipv4.addresses 192.168.1.100/24
+sudo nmcli con up "Wired connection 2"
+
+# 连通性测试（应返回 0% packet loss）
+ping -c 2 192.168.1.82
+```
+
+---
+
+### 2. 视觉实时查看的两种启动方式
+
+系统针对不同调试场景，分别提供了 **“本地原生极速弹窗”** 与 **“ROS 2 标准工具订阅”** 两种查看方式：
+
+#### 方式一：原生 OpenCV 高帧率直接弹窗（推荐 · 零延迟 60+ FPS）
+* **特点**：直接在节点底层调用 OpenCV HighGUI 进行画面渲染，**避开任何中间话题序列化拷贝与传输延迟**，画质最高、帧率拉满，极适合比赛现场和单机快速调测。
+* **启动指令 A：单节点极速启动（Python PyTorch Batch=2 批处理 · 推荐）**
+  ```bash
+  cd /home/aerialstewart/26_RC_Volleyball
+  python3 ros2_stereo_vision_node.py
+  ```
+  > **效果**：前台直接弹出 `ROS 2 Stereo Volleyball Vision` 双目合并画面，叠加目标框与 3D 坐标；后台同步向 ROS 2 总线发布三维坐标。按 `q` 或 `ESC` 退出。
+
+* **启动指令 B：整车全流水线一键启动（全自动闭环）**
+  ```bash
+  cd /home/aerialstewart/26_RC_Volleyball
+  source /opt/ros/jazzy/setup.bash
+  source install/setup.bash
+  ros2 launch soem_bringup volleyball_all.launch.py vision_engine:=python
+  ```
+  > **参数说明**：
+  > - `vision_engine:=python`：使用高吞吐 PyTorch 批处理视觉引擎（默认推荐，67 FPS）；
+  > - `vision_engine:=cpp`：切换为 C++ 原生 OpenCV DNN 视觉引擎；
+  > - `launch_soem:=true`：实车连入真实 EtherCAT 电机总线时启用。
+
+---
+
+#### 方式二：ROS 2 官方标准工具订阅查看（模块解耦 · 适合无线远程多机调试）
+* **特点**：视觉节点在后台持续发布标准图像话题 `/volleyball/debug_image`（`sensor_msgs/msg/Image`）。车端即使在无显示屏（headless）模式下运行，场外或选手席笔记本也能通过 Wi-Fi 局域网接入查看。
+* **启动与查看指令**：
+  先在车端运行视觉节点（如 `python3 ros2_stereo_vision_node.py` 或全车 launch），然后在监控终端运行以下任一官方工具：
+
+  1. **`rqt_image_view`（官方最常用推荐）**：
+     ```bash
+     ros2 run rqt_image_view rqt_image_view
+     ```
+     *操作：在界面左上角下拉菜单中选择 `/volleyball/debug_image` 即可实时查看带检测框与坐标叠加的画面。*
+
+  2. **`rviz2`（官方 3D 综合态势感知监控）**：
+     ```bash
+     rviz2
+     ```
+     *操作：点击左下角 **Add** -> 切换至 **By topic** -> 添加 `/volleyball/debug_image` 下的 **Image** 组件；同时可添加 `/volleyball/position`（PointStamped）与 `/volleyball/trajectory_pred` 观察排球 3D 空间轨迹与落点抛物线。*
+
+  3. **`image_view` 极简独立弹窗**：
+     ```bash
+     ros2 run image_view image_view --ros-args -r image:=/volleyball/debug_image
+     ```
+
+---
+
+### 3. 底层硬件维护工具 (`tools/`)
+
+对于相机连通性检测、底层曝光/增益调试或标定截图，可使用独立 C++ 工具：
+```bash
+cd /home/aerialstewart/26_RC_Volleyball/tools
+./build.sh        # 一键重新编译
+./view_cameras    # 运行硬件诊断工具（按 s 截图，按 e 调曝光，按 g 调增益，按 q 退出）
+```
+
