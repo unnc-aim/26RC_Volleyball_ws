@@ -239,7 +239,9 @@ class Ros2StereoVisionNode(Node):
                 pt_msg.point.z = float(z)
                 self.point_pub.publish(pt_msg)
 
-        if self.show_window:
+        # Prepare visual display / ROS image topic if needed
+        need_display = self.show_window or (self.debug_img_pub.get_subscription_count() > 0)
+        if need_display:
             disp_w, disp_h = 640, 360
             sx, sy = disp_w / 1280.0, disp_h / 720.0
 
@@ -271,7 +273,7 @@ class Ros2StereoVisionNode(Node):
 
             combined = cv2.hconcat([disp_l, disp_r])
 
-            # Also publish to ROS 2 debug image topic (viewable by rqt_image_view / rviz2)
+            # Publish to ROS 2 debug image topic (viewable by rqt_image_view / rviz2)
             if self.debug_img_pub.get_subscription_count() > 0:
                 img_msg = Image()
                 img_msg.header.stamp = self.get_clock().now().to_msg()
@@ -283,10 +285,12 @@ class Ros2StereoVisionNode(Node):
                 img_msg.data = combined.tobytes()
                 self.debug_img_pub.publish(img_msg)
 
-            cv2.imshow("ROS 2 Stereo Volleyball Vision (Direct OpenCV GUI)", combined)
-            key = cv2.waitKey(1)
-            if key == ord('q') or key == ord('Q') or key == 27:
-                rclpy.shutdown()
+            # Direct OpenCV GUI window
+            if self.show_window:
+                cv2.imshow("ROS 2 Stereo Volleyball Vision (Direct OpenCV GUI)", combined)
+                key = cv2.waitKey(1)
+                if key == ord('q') or key == ord('Q') or key == 27:
+                    rclpy.shutdown()
 
     def destroy_node(self):
         if hasattr(self, 'cam_l'): self.cam_l.close()

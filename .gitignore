@@ -8,6 +8,6 @@ log/
 .vscode/
 *.swp
 
-# MindVision runtime logs & binaries
 Camera/
 view_cameras
+tools/view_cameras
