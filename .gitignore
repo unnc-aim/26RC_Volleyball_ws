@@ -11,3 +11,5 @@ log/
 Camera/
 view_cameras
 tools/view_cameras
+__pycache__/
+*.pyc

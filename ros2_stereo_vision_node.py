@@ -130,12 +130,14 @@ class Ros2StereoVisionNode(Node):
         self.declare_parameter('model_path', '/home/aerialstewart/26_RC_Volleyball/src/volleyball_vision/models/yolov8n.pt')
         self.declare_parameter('show_window', True)
         self.declare_parameter('frame_id', 'camera_optical_frame')
+        self.declare_parameter('baseline', 0.8)
 
         self.imgsz = int(self.get_parameter('imgsz').value)
         self.conf_thresh = float(self.get_parameter('conf_thresh').value)
         self.model_path = str(self.get_parameter('model_path').value)
         self.show_window = bool(self.get_parameter('show_window').value)
         self.frame_id = str(self.get_parameter('frame_id').value)
+        self.baseline = float(self.get_parameter('baseline').value)
 
         self.point_pub = self.create_publisher(PointStamped, '/volleyball/position', 10)
         self.debug_img_pub = self.create_publisher(Image, '/volleyball/debug_image', 10)
@@ -224,10 +226,9 @@ class Ros2StereoVisionNode(Node):
 
             disparity = cx_l - cx_r
             if disparity > 1.0:
-                # Approximate geometry (baseline=1.8m, focal length ~1400px at 1280x720)
+                # Approximate geometry (baseline=0.8m, focal length ~1400px at 1280x720)
                 f_px = 1400.0
-                baseline = 1.8
-                z = (f_px * baseline) / disparity
+                z = (f_px * self.baseline) / disparity
                 x = (cx_l - 640.0) * z / f_px
                 y = (cy_l - 360.0) * z / f_px
 
